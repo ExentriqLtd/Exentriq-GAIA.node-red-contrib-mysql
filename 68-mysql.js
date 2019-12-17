@@ -101,6 +101,7 @@ module.exports = function(RED) {
     function MysqlDBNodeIn(n) {
         RED.nodes.createNode(this,n);
         this.mydb = n.mydb;
+        this.pool = n.pool;
         this.mydbConfig = RED.nodes.getNode(this.mydb);
 
         if (this.mydbConfig) {
@@ -122,7 +123,8 @@ module.exports = function(RED) {
                 if (node.mydbConfig.connected) {
                     if (typeof msg.topic === 'string') {
                         var bind = Array.isArray(msg.payload) ? msg.payload : [];
-                        node.mydbConfig.pool.query(msg.topic, bind, function(err, rows) {
+                        var runner = node.pool ? node.mydbConfig.pool : node.mydbConfig.connection
+                        runner.query(msg.topic, bind, function(err, rows) {
                             if (err) {
                                 node.error(err,msg);
                                 status = {fill:"red",shape:"ring",text:"Error"};
